@@ -66,6 +66,7 @@ async function Checkout() {
 }
 
 async function PlatesScanningSystem() {
+  let systemRun = true;
   do {
     let actionType = await select({
       message: "Action Type",
@@ -105,10 +106,10 @@ async function PlatesScanningSystem() {
         console.log("Drive safe!");
         break;
       case "close":
-        PLATES_ENTERED = [];
+        systemRun = false;
         break;
     }
-  } while (PLATES_ENTERED.length > 0);
+  } while (systemRun);
 }
 
 PlatesScanningSystem();
