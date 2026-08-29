@@ -40,7 +40,17 @@ async function Checkout() {
 
   const hoursSpent = Math.floor(convertTimeToSeconds / 3600);
   const minutesSpent = Math.floor((convertTimeToSeconds % 3600) / 60);
-  const secondsSpent = convertTimeToSeconds % 60;
+  //   const secondsSpent = convertTimeToSeconds % 60;
+
+  if (hoursSpent === 0 && minutesSpent < 10) {
+    console.log("Free parking.");
+  } else if (hoursSpent === 0 && minutesSpent > 30) {
+    console.log("Parking fee R15.00");
+  } else if (hoursSpent > 1) {
+    console.log("Parking fee R30.00");
+  } else if (hoursSpent > 1 && minutesSpent > 30) {
+    console.log("Parking fee R45.00");
+  }
 
   const findIndexOfPlate = PLATES_ENTERED.findIndex((p) => p === findPlate);
   if (findIndexOfPlate !== -1) {
