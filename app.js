@@ -4,9 +4,9 @@ let PLATES_ENTERED = [];
 let PLATES_EXIT = [];
 let PLATES_PAID = [];
 
-async function CarEnter(time) {
+async function CarEnter() {
   let d = new Date();
-  time = d.toTimeString().split(" ")[0];
+  let time = d.toTimeString().split(" ")[0];
   const carEntered = (await input({ message: "number-plate" })).replace(
     /\s/g,
     "",
@@ -35,20 +35,24 @@ async function Checkout() {
     return startWith == PlateNumberToCheckout;
   });
 
+  if (!findPlate) {
+    return console.log("Plate not found");
+  }
+
   let convertTimeToSeconds =
     timeToSeconds(currentTime) - timeToSeconds(timeEntered);
 
   const hoursSpent = Math.floor(convertTimeToSeconds / 3600);
   const minutesSpent = Math.floor((convertTimeToSeconds % 3600) / 60);
-  //   const secondsSpent = convertTimeToSeconds % 60;
+  const totalMinutes = hoursSpent * 60 + minutesSpent;
 
-  if (hoursSpent === 0 && minutesSpent < 10) {
+  if (totalMinutes < 10) {
     console.log("Free parking.");
-  } else if (hoursSpent === 0 && minutesSpent > 30) {
+  } else if (totalMinutes <= 30) {
     console.log("Parking fee R15.00");
-  } else if (hoursSpent > 1) {
+  } else if (totalMinutes <= 90) {
     console.log("Parking fee R30.00");
-  } else if (hoursSpent > 1 && minutesSpent > 30) {
+  } else {
     console.log("Parking fee R45.00");
   }
 
@@ -56,25 +60,12 @@ async function Checkout() {
   if (findIndexOfPlate !== -1) {
     PLATES_PAID.push(findPlate);
     PLATES_ENTERED.splice(findIndexOfPlate, 1); // mutates in place, removes 1 item
-  } else {
-    console.log("Plate not found");
   }
 
-  //   console.log("________________________________________________");
-  //   console.log(`Index of item in array : ${findIndexOfPlate}`);
-  //   console.log(`Array after cut${PLATES_ENTERED}`);
-  //   console.log(`Time entered: ${timeEntered}\n Current time ${currentTime}`);
-  //   console.log(
-  //     `Total time spent: ${hoursSpent}h ${minutesSpent}m ${secondsSpent}s`,
-  //   );
-  //   console.log(`Plate paid for : ${PLATES_PAID}`);
-  //   console.log("________________________________________________");
-
-  return console.log(findPlate);
+  return console.log("Thanks for shopping with us!");
 }
 
 async function PlatesScanningSystem() {
-  let timeStart;
   do {
     let actionType = await select({
       message: "Action Type",
@@ -105,14 +96,10 @@ async function PlatesScanningSystem() {
 
     switch (actionType) {
       case "car entering":
-        console.log("Hello and welcome!");
-        await CarEnter(timeStart);
-        console.log(PLATES_ENTERED);
+        await CarEnter();
         break;
       case "checkout":
-        console.log("Thanks for visiting with us");
         await Checkout();
-        console.log(PLATES_PAID);
         break;
       case "car exit":
         console.log("Drive safe!");
