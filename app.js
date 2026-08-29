@@ -15,6 +15,11 @@ async function CarEnter(time) {
   return PLATES_ENTERED.push(carEntered + `/${time}`);
 }
 
+function timeToSeconds(timeStr) {
+  const [hours, minutes, seconds] = timeStr.split(":").map(Number);
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
 async function Checkout() {
   let d = new Date();
   const currentTime = d.toTimeString().split(" ")[0];
@@ -30,22 +35,30 @@ async function Checkout() {
     return startWith == PlateNumberToCheckout;
   });
 
+  let convertTimeToSeconds =
+    timeToSeconds(currentTime) - timeToSeconds(timeEntered);
+
+  const hoursSpent = Math.floor(convertTimeToSeconds / 3600);
+  const minutesSpent = Math.floor((convertTimeToSeconds % 3600) / 60);
+  const secondsSpent = convertTimeToSeconds % 60;
+
   const findIndexOfPlate = PLATES_ENTERED.findIndex((p) => p === findPlate);
   if (findIndexOfPlate !== -1) {
     PLATES_PAID.push(findPlate);
-    const removedItem = PLATES_ENTERED.splice(findIndexOfPlate, 1); // mutates in place, removes 1 item
-    console.log("________________________________________________");
-    console.log(`Item removed: ${removedItem}`);
-    console.log("________________________________________________");
+    PLATES_ENTERED.splice(findIndexOfPlate, 1); // mutates in place, removes 1 item
   } else {
     console.log("Plate not found");
   }
-  console.log("________________________________________________");
-  console.log(`Index of item in array : ${findIndexOfPlate}`);
-  console.log(`Array after cut${PLATES_ENTERED}`);
-  console.log(`Time entered: ${timeEntered}\n Current time ${currentTime}`);
-  console.log(`Plate paid for : ${PLATES_PAID}`);
-  console.log("________________________________________________");
+
+  //   console.log("________________________________________________");
+  //   console.log(`Index of item in array : ${findIndexOfPlate}`);
+  //   console.log(`Array after cut${PLATES_ENTERED}`);
+  //   console.log(`Time entered: ${timeEntered}\n Current time ${currentTime}`);
+  //   console.log(
+  //     `Total time spent: ${hoursSpent}h ${minutesSpent}m ${secondsSpent}s`,
+  //   );
+  //   console.log(`Plate paid for : ${PLATES_PAID}`);
+  //   console.log("________________________________________________");
 
   return console.log(findPlate);
 }
