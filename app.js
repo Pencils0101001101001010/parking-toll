@@ -4,35 +4,49 @@ let PLATES_ENTERED = [];
 let PLATES_EXIT = [];
 let PLATES_PAID = [];
 
-async function CarEnter() {
-  let d = new Date();
-  let time = d.toTimeString().split(" ")[0];
-  const carEntered = (await input({ message: "number-plate" })).replace(
-    /\s/g,
-    "",
-  );
-  //^ can include a check to make sure car entered field is not empty
-  return PLATES_ENTERED.push(carEntered + `/${time}`);
-}
-
 function timeToSeconds(timeStr) {
   const [hours, minutes, seconds] = timeStr.split(":").map(Number);
   return hours * 3600 + minutes * 60 + seconds;
+}
+
+function normalizePlates(plate) {
+  return plate.replace(/\s/g, "").toLowerCase();
+}
+
+async function CarEnter() {
+  let d = new Date();
+  let time = d.toTimeString().split(" ")[0];
+  const carEntered = normalizePlates(await input({ message: "number-plate" }));
+
+  if (!carEntered) {
+    console.log("Plate number can not be empty.");
+    return;
+  }
+
+  //^ can include a check to make sure car entered field is not empty
+  return PLATES_ENTERED.push(carEntered + `/${time}`);
 }
 
 async function Checkout() {
   let d = new Date();
   const currentTime = d.toTimeString().split(" ")[0];
 
-  let PlateNumberToCheckout = await input({
-    message: "Enter you license plate number:",
-  });
+  let PlateNumberToCheckout = normalizePlates(
+    await input({
+      message: "Enter you license plate number:",
+    }),
+  );
+
+  if (!PlateNumberToCheckout) {
+    console.log("Plate number can not be empty.");
+    return;
+  }
 
   let timeEntered;
   const findPlate = PLATES_ENTERED.find((p) => {
-    let startWith = p.split("/")[0];
+    let numberPlate = p.split("/")[0];
     timeEntered = p.split("/")[1];
-    return startWith == PlateNumberToCheckout;
+    return numberPlate == PlateNumberToCheckout;
   });
 
   if (!findPlate) {
@@ -57,12 +71,38 @@ async function Checkout() {
   }
 
   const findIndexOfPlate = PLATES_ENTERED.findIndex((p) => p === findPlate);
+
   if (findIndexOfPlate !== -1) {
     PLATES_PAID.push(findPlate);
     PLATES_ENTERED.splice(findIndexOfPlate, 1); // mutates in place, removes 1 item
   }
 
   return console.log("Thanks for shopping with us!");
+}
+
+async function CarExit() {
+  const plateExiting = normalizePlates(
+    await input({ message: "Plate at gate" }),
+  );
+
+  if (!plateExiting) {
+    console.log("Plate number can not be empty.");
+    return;
+  }
+
+  const findIndexOfPlate = PLATES_PAID.findIndex(
+    (p) => p.split("/")[0] === plateExiting,
+  );
+
+  if (findIndexOfPlate === -1) {
+    console.log("Return to pay station.");
+    return;
+  }
+
+  const [exitedPlate] = PLATES_PAID.splice(findIndexOfPlate, 1);
+  PLATES_EXIT.push(exitedPlate);
+
+  console.log("Drive safe");
 }
 
 async function PlatesScanningSystem() {
@@ -87,8 +127,8 @@ async function PlatesScanningSystem() {
           description: "Car leaving parking lot.",
         },
         {
-          name: "close",
-          value: "close",
+          name: "off",
+          value: "off",
           description: "Stop system",
         },
       ],
@@ -98,14 +138,17 @@ async function PlatesScanningSystem() {
     switch (actionType) {
       case "car entering":
         await CarEnter();
+        // console.log(`Plates entered : ${PLATES_ENTERED}`);
         break;
       case "checkout":
         await Checkout();
+        // console.log(`Plates paid : ${PLATES_PAID}`);
         break;
       case "car exit":
-        console.log("Drive safe!");
+        await CarExit();
+        // console.log(`Plates exit ${PLATES_EXIT}`);
         break;
-      case "close":
+      case "off":
         systemRun = false;
         break;
     }
