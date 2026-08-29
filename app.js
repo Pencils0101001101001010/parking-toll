@@ -30,9 +30,22 @@ async function Checkout() {
     return startWith == PlateNumberToCheckout;
   });
 
-  //   const removePlate = PLATES_ENTERED.
-
+  const findIndexOfPlate = PLATES_ENTERED.findIndex((p) => p === findPlate);
+  if (findIndexOfPlate !== -1) {
+    PLATES_PAID.push(findPlate);
+    const removedItem = PLATES_ENTERED.splice(findIndexOfPlate, 1); // mutates in place, removes 1 item
+    console.log("________________________________________________");
+    console.log(`Item removed: ${removedItem}`);
+    console.log("________________________________________________");
+  } else {
+    console.log("Plate not found");
+  }
+  console.log("________________________________________________");
+  console.log(`Index of item in array : ${findIndexOfPlate}`);
+  console.log(`Array after cut${PLATES_ENTERED}`);
   console.log(`Time entered: ${timeEntered}\n Current time ${currentTime}`);
+  console.log(`Plate paid for : ${PLATES_PAID}`);
+  console.log("________________________________________________");
 
   return console.log(findPlate);
 }
@@ -76,6 +89,7 @@ async function PlatesScanningSystem() {
       case "checkout":
         console.log("Thanks for visiting with us");
         await Checkout();
+        console.log(PLATES_PAID);
         break;
       case "car exit":
         console.log("Drive safe!");
